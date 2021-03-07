@@ -27,8 +27,40 @@ import se.kth.id2203.networking._;
 import se.kth.id2203.overlay.Routing;
 import se.sics.kompics.sl._;
 import se.sics.kompics.network.Network;
+import scala.collection.mutable.HashMap;
 
 class KVService extends ComponentDefinition {
+
+  class KVStore {
+    val store = HashMap[Int, String]();
+
+    def get(key: Int): Option[String] = {
+      store.get(key.hashCode());
+    }
+
+    def get(key:String): Option[String] = {
+      store.get(key.hashCode());
+    }
+
+    def put(key:Int, value:Int): Unit = {
+      store.put(key.hashCode(), value.toString());
+    }
+
+    def put(key:Int, value:String): Unit = {
+      store.put(key.hashCode(), value);
+    }
+
+    def put(key:String, value:String): Unit = {
+      store.put(key.hashCode(), value);
+    }
+  }
+
+  val store = new KVStore();
+
+  // Add some ekys for early testing
+  for(i <- 1 to 50){
+    store.put(i, i);
+  }
 
   //******* Ports ******
   val net = requires[Network];
