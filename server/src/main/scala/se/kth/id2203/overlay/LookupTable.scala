@@ -57,9 +57,29 @@ class LookupTable extends NodeAssignment with Serializable {
 }
 
 object LookupTable {
-  def generate(nodes: Set[NetAddress]): LookupTable = {
+  /*
+   * Generating the lookup table. Will be using a really simple partitioning system, that might not be
+   * extremely dynamic but should give decent distribution among the different partitions.
+   * Amount of partitions is set in the reference.conf file, as well as the replication degree.
+   * Each partition is assigned a number from 0 to numberOfPartitions-1
+   * A new key is assigned to a partition(and the partition is therefore responsible for such keys)
+   * by which the key(Integer) %(modulo) numberOfPartitions == partitionNumber.
+   * The replicationDegree sets the amount of servers assigned to the same partitions and there has to be
+   * replicationDegree*numberOfPartitions amount of servers to generate the LookupTable.
+   */
+  def generate(nodes: Set[NetAddress], replicationDegree: Int): LookupTable = {
     val lut = new LookupTable();
-    lut.partitions ++= (0 -> nodes);
-    lut
+    var i = 0;
+    var partition = 0;
+
+    for(node <- nodes){
+      lut.partitions.put(partition, node);
+      i += 1
+      if(i >= replicationDegree){
+        i = 0;
+        partition += 1;
+      }
+    }
+    lut;
   }
 }
